@@ -1,4 +1,5 @@
 const { Sequelize } = require("sequelize");
+const mysql2 = require("mysql2");
 // const sequelize = new Sequelize("blogs_test", "root", "Sohail@2045", {
 //   host: "localhost",
 //   dialect: "mysql",
@@ -10,6 +11,8 @@ const sequelize = new Sequelize({
   username: "techscope-admin",
   password: "L8m(KF0+[~lr",
   host: "173.201.188.181",
+  dialect: "mysql",
+  dialectModule: mysql2,
 });
 
 // const sequelize = new Sequelize({
