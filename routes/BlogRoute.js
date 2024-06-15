@@ -94,6 +94,8 @@ const BlogModel = require("../models/BlogsModel");
 //   }
 // });
 
+// using buffer
+
 router.post("/create", upload.single("image"), async (req, res) => {
   try {
     let { title, description, showOnScreen } = req.body;
@@ -326,37 +328,81 @@ router.delete("/:id", async (req, res) => {
  *
  *
  */
+// router.put("/:id", upload.single("image"), async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     let { title, description, showOnScreen } = req.body;
+//     let imagePath = req?.file?.filename;
+//     imagePath = imagePath ? "/uploads/" + imagePath : null;
+//     console.log("Hello world");
+//     const blog = await BlogModel.findByPk(id);
+//     if (!blog) {
+//       return res.status(404).send({ message: "Blog not exist" });
+//     } else {
+//       if (showOnScreen !== undefined) {
+//         if (typeof showOnScreen == "boolean") {
+//         } else if (showOnScreen == "true") {
+//           showOnScreen = true;
+//         } else {
+//           showOnScreen = false;
+//         }
+//       } else {
+//         showOnScreen = blog.showOnScreen;
+//       }
+
+//       blog.title = title || blog.title;
+//       blog.image = imagePath || blog.image;
+//       blog.description = description || blog.description;
+//       blog.showOnScreen = showOnScreen;
+//       await blog.save();
+//       return res
+//         .status(200)
+//         .send({ message: "Blog updated successfully", updatedBlog: blog });
+//     }
+//   } catch (error) {
+//     console.error("Error updating blog:", error);
+//     return res.status(500).send({ message: "Internal server error" });
+//   }
+// });
+
+// using buffer
+
 router.put("/:id", upload.single("image"), async (req, res) => {
   try {
     const { id } = req.params;
     let { title, description, showOnScreen } = req.body;
-    let imagePath = req?.file?.filename;
-    imagePath = imagePath ? "/uploads/" + imagePath : null;
-    console.log("Hello world");
+    let imageBuffer = req.file ? req.file.buffer : null;
+
     const blog = await BlogModel.findByPk(id);
     if (!blog) {
-      return res.status(404).send({ message: "Blog not exist" });
-    } else {
-      if (showOnScreen !== undefined) {
-        if (typeof showOnScreen == "boolean") {
-        } else if (showOnScreen == "true") {
-          showOnScreen = true;
-        } else {
-          showOnScreen = false;
-        }
-      } else {
-        showOnScreen = blog.showOnScreen;
-      }
-
-      blog.title = title || blog.title;
-      blog.image = imagePath || blog.image;
-      blog.description = description || blog.description;
-      blog.showOnScreen = showOnScreen;
-      await blog.save();
-      return res
-        .status(200)
-        .send({ message: "Blog updated successfully", updatedBlog: blog });
+      return res.status(404).send({ message: "Blog not found" });
     }
+
+    if (showOnScreen !== undefined) {
+      if (typeof showOnScreen === "boolean") {
+        // No change needed
+      } else if (showOnScreen === "true") {
+        showOnScreen = true;
+      } else {
+        showOnScreen = false;
+      }
+    } else {
+      showOnScreen = blog.showOnScreen;
+    }
+
+    // Update blog fields
+    blog.title = title || blog.title;
+    if (imageBuffer) {
+      // Update image as buffer
+      blog.image = imageBuffer;
+    }
+    blog.description = description || blog.description;
+    blog.showOnScreen = showOnScreen;
+    await blog.save();
+
+    return res
+      .status(200)
+      .send({ message: "Blog updated successfully", updatedBlog: blog });
   } catch (error) {
     console.error("Error updating blog:", error);
     return res.status(500).send({ message: "Internal server error" });
