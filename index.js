@@ -23,7 +23,7 @@ const options = {
 
 const swaggerSpec = swaggerJSDoc(options);
 
-app.use("/api", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
+app.use("/", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 
 app.use(cors());
 app.use(express.static("./public"));
