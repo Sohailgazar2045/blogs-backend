@@ -371,11 +371,10 @@ router.put("/:id", upload.single("image"), async (req, res) => {
   try {
     const { id } = req.params;
     let { title, description, showOnScreen } = req.body;
-    let imageBuffer = req.file ? req.file.buffer : null;
 
     const blog = await BlogModel.findByPk(id);
     if (!blog) {
-      return res.status(404).send({ message: "Blog not found" });
+      return res.status(404).json({ message: "Blog not found" });
     }
 
     if (showOnScreen !== undefined) {
@@ -392,20 +391,23 @@ router.put("/:id", upload.single("image"), async (req, res) => {
 
     // Update blog fields
     blog.title = title || blog.title;
-    if (imageBuffer) {
-      // Update image as buffer
-      blog.image = imageBuffer;
+
+    if (req.file) {
+      // Convert buffer to base64 string if image is uploaded
+      let imageBase64 = req.file.buffer.toString("base64");
+      blog.image = imageBase64;
     }
+
     blog.description = description || blog.description;
     blog.showOnScreen = showOnScreen;
     await blog.save();
 
     return res
       .status(200)
-      .send({ message: "Blog updated successfully", updatedBlog: blog });
+      .json({ message: "Blog updated successfully", updatedBlog: blog });
   } catch (error) {
     console.error("Error updating blog:", error);
-    return res.status(500).send({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 });
 
