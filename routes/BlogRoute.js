@@ -57,12 +57,50 @@ const BlogModel = require("../models/BlogsModel");
  *
  */
 
+// router.post("/create", upload.single("image"), async (req, res) => {
+//   try {
+//     let { title, description, showOnScreen } = req.body;
+
+//     if (showOnScreen) {
+//       if (typeof showOnScreen == "boolean") {
+//       } else if (showOnScreen == "true") {
+//         showOnScreen = true;
+//       } else {
+//         showOnScreen = false;
+//       }
+//     } else {
+//       showOnScreen = false;
+//     }
+
+//     if (title.trim() == "" || description.trim() == "") {
+//       return res
+//         .status(404)
+//         .send({ message: "Title and description is required" });
+//     }
+//     let imagePath = req?.file?.filename;
+//     imagePath = imagePath ? "/uploads/" + imagePath : null;
+//     if (imagePath == null) {
+//       return res.status(404).send({ message: "Image is required" });
+//     }
+//     let createBlog = await BlogModel.create({
+//       title,
+//       image: imagePath,
+//       description,
+//       showOnScreen,
+//     });
+//     return res.status(200).send({ blog: createBlog });
+//   } catch (error) {
+//     return res.status(500).send({ message: "Internal server error" });
+//   }
+// });
+
 router.post("/create", upload.single("image"), async (req, res) => {
   try {
     let { title, description, showOnScreen } = req.body;
 
     if (showOnScreen) {
       if (typeof showOnScreen == "boolean") {
+        // No need to change showOnScreen
       } else if (showOnScreen == "true") {
         showOnScreen = true;
       } else {
@@ -74,23 +112,22 @@ router.post("/create", upload.single("image"), async (req, res) => {
 
     if (title.trim() == "" || description.trim() == "") {
       return res
-        .status(404)
-        .send({ message: "Title and description is required" });
+        .status(400)
+        .json({ message: "Title and description are required" });
     }
-    let imagePath = req?.file?.filename;
-    imagePath = imagePath ? "/uploads/" + imagePath : null;
-    if (imagePath == null) {
-      return res.status(404).send({ message: "Image is required" });
-    }
+
+    let imageBase64 = req.file.buffer.toString("base64"); // Convert buffer to base64 string
     let createBlog = await BlogModel.create({
       title,
-      image: imagePath,
+      image: imageBase64,
       description,
       showOnScreen,
     });
-    return res.status(200).send({ blog: createBlog });
+
+    return res.status(200).json({ blog: createBlog });
   } catch (error) {
-    return res.status(500).send({ message: "Internal server error" });
+    console.error("Error creating blog:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 });
 
